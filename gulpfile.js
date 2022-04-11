@@ -31,11 +31,13 @@ gulp.task('watch', function () {
   gulp.watch('./sass/**/*.scss', ['sass']);
 });
 
-gulp.task('clean-build', function(){
+gulp.task('clean-build', async function(){
     del.sync('./dist/*');
 });
 
-gulp.task('build', gulp.series(gulp.parallel('sass','clean-build'), function(){
+// gulp.series('sass','clean-build')
+
+gulp.task('build', async function(){
     gulp.src('public/index.html')
         .pipe(useref())
         .pipe(gulpif('*.js', uglify()))
@@ -44,6 +46,6 @@ gulp.task('build', gulp.series(gulp.parallel('sass','clean-build'), function(){
 
     gulp.src(['./public/*.*','./public/.nojekyll','!public/index.html','!public/styles.css','!public/bb8.css','!public/*.js'])
         .pipe(gulp.dest('./dist'));
-}));
+});
 
 gulp.task('default', gulp.series('sass', 'connect', 'watch'));
