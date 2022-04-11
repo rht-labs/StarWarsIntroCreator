@@ -1,11 +1,11 @@
 var gulp = require('gulp');
 var connect = require('gulp-connect');
-var sass = require('gulp-sass');
+var sass = require('gulp-sass')(require('sass'));
 var del = require('del');
 var useref = require('gulp-useref');
 var gulpif = require('gulp-if');
 var uglify = require('gulp-uglify');
-var minifyCss = require('gulp-minify-css');
+var minifyCss = require('gulp-clean-css');
 
 gulp.task('connect', function() {
   connect.server({
@@ -14,7 +14,7 @@ gulp.task('connect', function() {
   });
 });
 
-gulp.task('sass', function () {
+gulp.task('sass', async function () {
   gulp.src('./sass/**/*.scss')
     .pipe(sass().on('error', sass.logError))
     .pipe(gulp.dest('./public'))
@@ -31,11 +31,11 @@ gulp.task('watch', function () {
   gulp.watch('./sass/**/*.scss', ['sass']);
 });
 
-gulp.task('clean-build',function(){
+gulp.task('clean-build', function(){
     del.sync('./dist/*');
 });
 
-gulp.task('build',['sass','clean-build'],function(){
+gulp.task('build', gulp.series(gulp.parallel('sass','clean-build'), function(){
     gulp.src('public/index.html')
         .pipe(useref())
         .pipe(gulpif('*.js', uglify()))
@@ -44,6 +44,6 @@ gulp.task('build',['sass','clean-build'],function(){
 
     gulp.src(['./public/*.*','./public/.nojekyll','!public/index.html','!public/styles.css','!public/bb8.css','!public/*.js'])
         .pipe(gulp.dest('./dist'));
-});
+}));
 
-gulp.task('default', ['sass','connect','watch']);
+gulp.task('default', gulp.series('sass', 'connect', 'watch'));
